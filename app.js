@@ -1,10 +1,12 @@
 const BASE_URL = "https://open.er-api.com/v6/latest";
 
 const dropdowns = document.querySelectorAll(".dropdown select");
-const btn = document.querySelector("form button");
-const fromCurr = document.querySelector(".from select");
-const toCurr = document.querySelector(".to select");
+const btn = document.querySelector(".primary-btn");
+const swapBtn = document.querySelector(".swap");
+const fromCurr = document.querySelector("select[name='from']");
+const toCurr = document.querySelector("select[name='to']");
 const msg = document.querySelector(".msg");
+const amountInput = document.querySelector("#amount");
 
 // Assuming countryList is already defined like:
 // const countryList = { USD: "US", INR: "IN", ... }
@@ -28,11 +30,10 @@ for (let select of dropdowns) {
 }
 
 const updateExchangeRate = async () => {
-  let amount = document.querySelector(".amount input");
-  let amtVal = amount.value;
-  if (amtVal === "" || amtVal < 1) {
+  let amtVal = parseFloat(amountInput.value);
+  if (!amtVal || amtVal < 1) {
     amtVal = 1;
-    amount.value = "1";
+    amountInput.value = "1";
   }
 
   const from = fromCurr.value.toUpperCase();
@@ -51,7 +52,7 @@ const updateExchangeRate = async () => {
       return;
     }
 
-    let finalAmount = (amtVal * rate);
+    let finalAmount = (amtVal * rate).toFixed(2);
     msg.innerText = `${amtVal} ${from} = ${finalAmount} ${to}`;
   } catch (error) {
     msg.innerText = "Error fetching exchange rate.";
@@ -71,6 +72,18 @@ btn.addEventListener("click", (evt) => {
   evt.preventDefault();
   updateExchangeRate();
 });
+
+if (swapBtn) {
+  swapBtn.addEventListener("click", (evt) => {
+    evt.preventDefault();
+    const fromValue = fromCurr.value;
+    fromCurr.value = toCurr.value;
+    toCurr.value = fromValue;
+    updateFlag(fromCurr);
+    updateFlag(toCurr);
+    updateExchangeRate();
+  });
+}
 
 window.addEventListener("load", () => {
   updateExchangeRate();
